@@ -1,0 +1,18 @@
+services:
+  telegram-bot:
+    image: egarcia/docker-manager-bot:latest
+    environment:
+      # --- Telegram Bot Token (Required) ---
+      # Replace <YOUR_TELEGRAM_TOKEN> with your actual bot token.
+      - TELEGRAM_TOKEN=<YOUR_TELEGRAM_TOKEN>
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # --- Webhook Configuration (Optional) ---
+    # Uncomment and configure the following lines to enable Webhook mode.
+    # You will need a public URL from a service like ngrok.
+    # environment:
+    #   - USE_WEBHOOK=true
+    #   - PUBLIC_URL=<YOUR_PUBLIC_URL> # e.g., https://1a2b-3c4d-5e6f.ngrok.io
+    #   - PORT=8443
+    # ports:
+    #   - "8443:8443"

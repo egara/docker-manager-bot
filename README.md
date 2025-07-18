@@ -103,3 +103,28 @@ Once the bot is running, you can interact with it through your Telegram client.
     Send the `/list` command to the bot. It will reply with a list of all currently running Docker containers on the host machine.
 *   **Stop running containers:**
     Send the `/stop` command to the bot. It will reply with a list of all currently running Docker containers on the host machine. Select the one you want to stop.
+
+## Deployment
+
+This repository is configured with GitHub Actions to automatically build and push the Docker image to [Docker Hub](https://hub.docker.com/r/egarcia/docker-manager-bot) upon every push to the `main` branch.
+
+Two tags are created for each push:
+- `latest`: Always points to the most recent build.
+- `YYYYMMDD`: A tag with the date of the build (e.g., `20250718`).
+
+### Running in Production
+
+For production environments, it's recommended to use the pre-built image from Docker Hub. A `docker-compose.prod.yaml` file is provided for this. It pulls the `egarcia/docker-manager-bot:latest` image.
+
+**Setup:**
+
+1.  Ensure you have a `docker-compose.prod.yaml` file.
+2.  Configure your Telegram Token in `docker-compose.prod.yaml` as described in the "Setup" section. You can also configure the webhook settings here if needed.
+
+**Command:**
+
+To run the bot using the production image, execute:
+```bash
+docker-compose -f docker-compose.prod.yaml up -d
+```
+This command will download the latest image from Docker Hub and start the bot in detached mode.
