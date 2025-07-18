@@ -1,7 +1,7 @@
 # Telegram Bot for Docker Management
 
 This project implements a Python-based Telegram bot to manage Docker containers running on a server. It is a pet project
-to test all the capabilities of Gemini-CLI. It pretends to be entirely build using this AI tool.
+to test all the capabilities of [Gemini-CLI](https://github.com/google-gemini/gemini-cli). It pretends to be entirely build using this AI tool.
 
 ## Features
 
