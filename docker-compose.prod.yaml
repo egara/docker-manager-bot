@@ -1,6 +1,8 @@
 services:
   telegram-bot:
     image: egarcia/docker-manager-bot:latest
+    container_name: docker-manager-bot
+    restart: unless-stopped
     environment:
       # --- Telegram Bot Token (Required) ---
       # Replace <YOUR_TELEGRAM_TOKEN> with your actual bot token.
