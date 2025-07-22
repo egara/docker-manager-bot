@@ -7,6 +7,7 @@ The project is developed in Python.
 # Implemented Commands
 - `/list`: Lists all running Docker containers.
 - `/stop`: Stops a running Docker container. When this command is executed, a list of active containers will be presented for the user to select which one to stop.
+- `/restart`: Restarts a running Docker container. When this command is executed, a list of active containers will be presented for the user to select which one to restart.
 
 # Basic Requirements
 

@@ -27,6 +27,7 @@ class TelegramBot:
         self.application.add_handler(CommandHandler("start", self.start))
         self.application.add_handler(CommandHandler("list", self.list_containers))
         self.application.add_handler(CommandHandler("stop", self.stop_container_command))
+        self.application.add_handler(CommandHandler("restart", self.restart_container_command))
         self.application.add_handler(CallbackQueryHandler(self.button_callback))
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -53,7 +54,10 @@ class TelegramBot:
 
         if query.data == 'show_commands':
             logger.info("User %s (%s) has requested to see the commands", query.from_user.first_name, query.from_user.id)
-            commands_message = "Available commands:\n/list - Lists running Docker containers.\n/stop - Stops a running Docker container."
+            commands_message = ("Available commands:\n"
+                              "/list - Lists running Docker containers.\n"
+                              "/stop - Stops a running Docker container.\n"
+                              "/restart - Restarts a running Docker container.")
             keyboard = [[InlineKeyboardButton("Show Commands", callback_data='show_commands')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await context.bot.send_message(chat_id=query.message.chat_id, text=commands_message, reply_markup=reply_markup)
@@ -61,11 +65,25 @@ class TelegramBot:
             container_id = query.data.replace('stop_', '')
             logger.info("User %s (%s) has requested to stop the container with ID: %s", query.from_user.first_name, query.from_user.id, container_id)
             try:
+                container_name = self.docker_manager.get_container_name(container_id)
                 self.docker_manager.stop_container(container_id)
-                message = f"Container {container_id} stopped successfully."
+                message = f"\U0001F44D Container '{container_name}' stopped successfully."
             except Exception as e:
                 message = f"Error stopping container {container_id}: {e}"
             
+            keyboard = [[InlineKeyboardButton("Show Commands", callback_data='show_commands')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(text=message, reply_markup=reply_markup)
+        elif query.data.startswith('restart_'):
+            container_id = query.data.replace('restart_', '')
+            logger.info("User %s (%s) has requested to restart the container with ID: %s", query.from_user.first_name, query.from_user.id, container_id)
+            try:
+                container_name = self.docker_manager.get_container_name(container_id)
+                self.docker_manager.restart_container(container_id)
+                message = f"\U0001F44D Container '{container_name}' restarted successfully."
+            except Exception as e:
+                message = f"Error restarting container {container_id}: {e}"
+
             keyboard = [[InlineKeyboardButton("Show Commands", callback_data='show_commands')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await query.edit_message_text(text=message, reply_markup=reply_markup)
@@ -117,6 +135,31 @@ class TelegramBot:
             reply_markup = InlineKeyboardMarkup(keyboard)
             await update.message.reply_text(message, reply_markup=reply_markup)
 
+    async def restart_container_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Handler for the /restart command.
+        Displays a list of running containers for the user to select which one to restart.
+        """
+        user = update.effective_user
+        logger.info("User %s (%s) has executed the /restart command", user.first_name, user.id)
+
+        containers = self.docker_manager.list_containers()
+        if containers:
+            message = "Select the container to restart:\n"
+            keyboard = []
+            for container in containers:
+                keyboard.append([InlineKeyboardButton(f"{container.name} ({container.short_id})", callback_data=f'restart_{container.short_id}')])
+
+            # Add the "Show Commands" button at the end
+            keyboard.append([InlineKeyboardButton("Show Commands", callback_data='show_commands')])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text(message, reply_markup=reply_markup)
+        else:
+            message = "No running containers to restart."
+            keyboard = [[InlineKeyboardButton("Show Commands", callback_data='show_commands')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text(message, reply_markup=reply_markup)
+
     def run(self, use_webhook=False, public_url=None, port=8443):
         """
         Starts the bot, either using Polling or Webhooks.
@@ -126,17 +169,17 @@ class TelegramBot:
             public_url (str): The base public URL (e.g., https://your-domain.com).
             port (int): The port the bot will listen on.
         """
-        self.application.initialize()
-
         if use_webhook:
             if not public_url:
                 raise ValueError("The public URL is required to use webhooks.")
-            
+
             print(f"Starting bot with Webhook on port {port}")
-            self.application.run_webhook(listen="0.0.0.0",
-                                         port=port,
-                                         url_path="/", # Use root path for webhook
-                                         webhook_url=f"{public_url}/")
+            self.application.run_webhook(
+                listen="0.0.0.0",
+                port=port,
+                url_path="/",
+                webhook_url=f"{public_url}/"
+            )
         else:
             print("Starting bot with Polling")
             self.application.run_polling()

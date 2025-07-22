@@ -25,3 +25,26 @@ class DockerManager:
         """
         container = self.client.containers.get(container_id)
         container.stop()
+
+    def restart_container(self, container_id):
+        """
+        Restarts a specific Docker container.
+
+        Args:
+            container_id (str): The ID or name of the container to restart.
+        """
+        container = self.client.containers.get(container_id)
+        container.restart()
+
+    def get_container_name(self, container_id):
+        """
+        Gets the name of a specific Docker container.
+
+        Args:
+            container_id (str): The ID of the container.
+
+        Returns:
+            str: The name of the container.
+        """
+        container = self.client.containers.get(container_id)
+        return container.name

@@ -7,6 +7,7 @@ to test all the capabilities of [Gemini-CLI](https://github.com/google-gemini/ge
 
 * List running Docker containers.
 * Stop running Docker containers.
+* Restart running Docker containers.
 
 ## Requirements
 
@@ -103,6 +104,8 @@ Once the bot is running, you can interact with it through your Telegram client.
     Send the `/list` command to the bot. It will reply with a list of all currently running Docker containers on the host machine.
 *   **Stop running containers:**
     Send the `/stop` command to the bot. It will reply with a list of all currently running Docker containers on the host machine. Select the one you want to stop.
+*   **Restart running containers:**
+    Send the `/restart` command to the bot. It will reply with a list of all currently running Docker containers on the host machine. Select the one you want to restart.
 
 ## Deployment
 
